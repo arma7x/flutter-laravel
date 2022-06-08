@@ -1,6 +1,10 @@
 import 'dart:core';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/material.dart' show BuildContext;
+import 'package:flutter_laravel/bloc/AuthState.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Api {
 
@@ -51,13 +55,52 @@ class Api {
         return Uri.http(BASE_URL, RESET_PASSWORD).toString();
     }
 
-    // save token to secure storage
-    static String SaveToken(String token) {
-        return token;
+    static void ValidateToken(BuildContext context) async {
+        final _storage = const FlutterSecureStorage();
+        String? token = await _storage.read(key: "sanctum-token");
+        if (token != null) {
+            print('ValidateToken: ${token}');
+            SaveToken(token, context);
+            // GetUserInfo(token);
+            // if connectionless > retrieve UserInfoState from cache
+            // if 401 > RemoveToken(context) && UserInfoState from cache
+            // else > update UserInfoState cached
+        } else {
+            print('ValidateToken bad');
+            RemoveToken(context);
+        }
+    }
+
+    static void SaveToken(String token, BuildContext context) async {
+        try {
+            final _storage = const FlutterSecureStorage();
+            await _storage.write(
+                key: "sanctum-token",
+                value: token,
+                iOptions: const IOSOptions(accountName: "flutter-laravel"),
+                aOptions: const AndroidOptions(encryptedSharedPreferences: true),
+            );
+            BlocProvider.of<AuthState>(context).add(UserLoggedIn());
+            String? value = await _storage.read(key: "sanctum-token");
+            // return Future<bool>.value(true);
+        } catch(e) {
+            RemoveToken(context);
+            // return Future<bool>.value(false);
+        }
+    }
+
+    static void RemoveToken(BuildContext context) async {
+        final _storage = const FlutterSecureStorage();
+        await _storage.delete(
+            key: "sanctum-token",
+            iOptions: const IOSOptions(accountName: "flutter-laravel"),
+            aOptions: const AndroidOptions(encryptedSharedPreferences: true),
+        );
+        BlocProvider.of<AuthState>(context).add(UserLoggedOut());
     }
 
     // save token from secure storage
-    static SaveUserInfo(Map<String, String> info) {}
+    static SaveUserInfo(Map<String, dynamic> info) {}
 
     // remove token from secure storage
     static RemoveUserInfo() {}
