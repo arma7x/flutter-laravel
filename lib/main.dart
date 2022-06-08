@@ -49,14 +49,6 @@ class MyHomePage extends StatelessWidget {
 
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
-  void _saveToken(ctx) {
-    Api.SaveToken("Test", ctx);
-  }
-
-  void _removeToken(ctx) {
-    Api.RemoveToken(ctx);
-  }
-
   @override
   Widget build(BuildContext context) {
 
@@ -75,23 +67,7 @@ class MyHomePage extends StatelessWidget {
             ),
           ],
         ),
-      ),
-      floatingActionButton: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          FloatingActionButton(
-            onPressed: () => _saveToken(context),
-            tooltip: 'Save Token',
-            child: const Icon(Icons.add),
-          ),
-          FloatingActionButton(
-            onPressed: () => _removeToken(context),
-            tooltip: 'Remove Token',
-            child: const Icon(Icons.remove),
-          )
-        ]
-      ),
+      )
     );
   }
 }
