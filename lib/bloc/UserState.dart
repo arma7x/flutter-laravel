@@ -6,11 +6,11 @@ class UserState extends Cubit<Map<String, dynamic>> {
         "email": "Please login",
     });
 
-    void setUserInfo(Map<String, dynamic> info) {
+    void setUser(Map<String, dynamic> info) {
         emit(info);
     }
 
-    void resetUserInfo() {
+    void resetUser() {
         emit(<String, dynamic>{
             "name": "Guest",
             "email": "Please login",
