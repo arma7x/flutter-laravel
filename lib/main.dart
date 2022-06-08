@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_laravel/api.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_laravel/bloc/AuthState.dart';
+import 'package:flutter_laravel/bloc/UserState.dart';
 
 void main() {
   BlocOverrides.runZoned(
@@ -18,6 +19,9 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider<AuthState>(
           create: (BuildContext context) => AuthState(),
+        ),
+        BlocProvider<UserState>(
+          create: (BuildContext context) => UserState(),
         ),
       ],
       child: const MyApp(),
