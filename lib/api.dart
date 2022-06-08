@@ -16,7 +16,6 @@ class Api {
     static const String pingPath = 'api/pingPath';
     static const String createTokenPath = 'api/tokens/create';
     static const String userInfoPath = 'api/user';
-    static const String loginPath = 'loginPath';
     static const String registerPath = 'registerPath';
     static const String resetPasswordPath = 'password/reset';
 
@@ -45,10 +44,6 @@ class Api {
                 'Authorization': 'Bearer $token',
             }
         );
-    }
-
-    static String getLoginLink() {
-        return Uri.http(baseUrl, loginPath).toString();
     }
 
     static String getRegisterLink() {
