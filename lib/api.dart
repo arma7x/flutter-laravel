@@ -62,9 +62,9 @@ class Api {
             print('ValidateToken: ${token}');
             SaveToken(token, context);
             // GetUserInfo(token);
-            // if connectionless > retrieve UserInfoState from cache
-            // if 401 > RemoveToken(context) && UserInfoState from cache
-            // else > update UserInfoState cached
+            // if connectionless > retrieve UserState from cache
+            // if 401 > RemoveToken(context) && UserState from cache
+            // else > update UserState cached
         } else {
             print('ValidateToken bad');
             RemoveToken(context);
