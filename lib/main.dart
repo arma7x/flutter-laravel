@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter_laravel/api.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_laravel/bloc/AuthState.dart';
 import 'package:flutter_laravel/bloc/UserState.dart';
+import 'package:flutter_laravel/navigations/LoginScreen.dart';
 
 void main() {
   BlocOverrides.runZoned(
@@ -36,11 +38,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter - Laravel Starter',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Laravel'),
+      home: const MyHomePage(title: 'Flutter - Laravel Starter'),
     );
   }
 }
@@ -80,10 +82,19 @@ class MyHomePage extends StatelessWidget {
                 ),
                 !status ? ListTile(
                   title: const Text('Login'),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(builder: (context) => const LoginScreen()),
+                    );
+                  },
                 ) : ListTile(
                   title: const Text('Logout'),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Api.destroySession(context);
+                  },
                 ),
               ],
             );
@@ -94,10 +105,14 @@ class MyHomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('Your status is:',),
-            Text(
-              BlocProvider.of<AuthState>(context, listen: true).state.toString(),
-              style: Theme.of(context).textTheme.headline4,
+            const Text('Your status is:'),
+            BlocBuilder<AuthState, bool>(
+              builder: (context, bool status) {
+                return Text(
+                  status.toString(),
+                  style: Theme.of(context).textTheme.headline4,
+                );
+              }
             ),
           ],
         ),

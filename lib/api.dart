@@ -13,10 +13,10 @@ class Api {
     static const String tokenKey = "sanctum-token";
     static const String userKey = "laravel-user";
     static const String baseUrl = '192.168.56.1:8000';
-    static const String pingPath = 'api/pingPath';
+    static const String pingPath = 'api/ping';
     static const String createTokenPath = 'api/tokens/create';
     static const String userInfoPath = 'api/user';
-    static const String registerPath = 'registerPath';
+    static const String registerPath = 'register';
     static const String resetPasswordPath = 'password/reset';
 
     static Future<http.Response> pingServer() async {
@@ -24,15 +24,56 @@ class Api {
         return await http.get(url);
     }
 
-    static Future<http.Response> createToken(Map<String, String> parameter) async {
-        final url = Uri.http(baseUrl, createTokenPath);
-        return await http.post(
-            url,
-            headers: <String, String>{
-                'Authorization': 'application/json; charset=UTF-8',
-            },
-            body: json.encode(parameter),
-        );
+    static void createToken(Map<String, String> parameter, Function(String) errorCallback, Function() successCallback, BuildContext context) async {
+        try {
+            final url = Uri.http(baseUrl, createTokenPath);
+            final authResponse = await http.post(
+                url,
+                headers: <String, String>{
+                    'Content-Type': 'application/json; charset=UTF-8',
+                    'user-Agent': 'Flutter',
+                },
+                body: json.encode(parameter),
+            );
+            final authResponseBody = json.decode(authResponse.body);
+            if (authResponse.statusCode == 200) {
+                final userResponse = await getUserInfo(authResponseBody['token']);
+                final userResponseBody = json.decode(userResponse.body);
+                if (userResponse.statusCode == 200) {
+                    saveSession(authResponseBody['token'], userResponseBody, context);
+                    successCallback();
+                } else if (userResponse.statusCode == 401) {
+                    if (userResponseBody['message'] != null) {
+                        errorCallback(userResponseBody['message']);
+                    } else {
+                        errorCallback("Unknown Error: 4");
+                    }
+                } else {
+                    errorCallback("Unknown Error: 3");
+                }
+            } else if (authResponse.statusCode == 422) {
+                // authResponseBody['errors']
+                if (authResponseBody['message'] != null) {
+                    errorCallback(authResponseBody['message']);
+                } else {
+                    errorCallback("Unknown Error: 2");
+                }
+            } else if (authResponse.statusCode == 400) {
+                if (authResponseBody['message'] != null) {
+                    errorCallback(authResponseBody['message']);
+                } else {
+                    errorCallback("Unknown Error: 1");
+                }
+            } else {
+                errorCallback("Unknown Error: 0");
+            }
+        } on SocketException {
+            errorCallback("No Internet connection 😑");
+        } on HttpException {
+            errorCallback("Couldn't find the post 😱");
+        } on FormatException {
+            errorCallback("Bad response format 👎");
+        }
     }
 
     static Future<http.Response> getUserInfo(String token) async {
@@ -46,12 +87,12 @@ class Api {
         );
     }
 
-    static String getRegisterLink() {
-        return Uri.http(baseUrl, registerPath).toString();
+    static Uri getRegisterLink() {
+        return Uri.http(baseUrl, registerPath);
     }
 
-    static String getResetPasswordLink() {
-        return Uri.http(baseUrl, resetPasswordPath).toString();
+    static Uri getResetPasswordLink() {
+        return Uri.http(baseUrl, resetPasswordPath);
     }
 
     static IOSOptions _getIOSOptions() {
@@ -63,17 +104,23 @@ class Api {
     }
 
     static void validateToken(BuildContext context) async {
+
+        void fallback(String token, String? usr) {
+            if (usr != null) {
+                final decodedUser = json.decode(usr);
+                saveSession(token, decodedUser, context);
+            }
+        }
+
         const storage = FlutterSecureStorage();
-        String? token = await storage.read(key: tokenKey); // '78|EyFHNquvDBLxsD7GS9YudY5nfhJyKBMuFMIfBKcb';
-        // Map<String, dynamic> userMap = json.decode(user!);
+        String? token = await storage.read(key: tokenKey);
         if (token != null) {
             String? user = await storage.read(key: userKey);
             try {
                 final response = await getUserInfo(token);
-                print(response.body);
                 final responseBody = json.decode(response.body);
                 if (response.statusCode == 200) {
-                    print(responseBody); // save
+                    saveSession(token, responseBody, context);
                 } else if (response.statusCode == 401) {
                     final snackBar = SnackBar(content: Text(responseBody['message']!));
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -81,19 +128,21 @@ class Api {
                 } else {
                     final snackBar = SnackBar(content: Text("Unknown"));
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    fallback(token, user);
                 }
             } on SocketException {
                 final snackBar = SnackBar(content: Text("No Internet connection 😑"));
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                fallback(token, user);
             } on HttpException {
                 final snackBar = SnackBar(content: Text("Couldn't find the post 😱"));
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                fallback(token, user);
             } on FormatException {
                 final snackBar = SnackBar(content: Text("Bad response format 👎"));
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                fallback(token, user);
             }
-        } else {
-            print("Please login");
         }
     }
 
