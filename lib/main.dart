@@ -63,6 +63,7 @@ class MyHomePage extends StatelessWidget {
       drawer: Drawer(
         child: BlocBuilder<AuthState, bool>(
           builder: (context, bool status) {
+            Map<String, dynamic> user = BlocProvider.of<UserState>(context, listen: false).state;
             return ListView(
               padding: EdgeInsets.zero,
               children: [
@@ -72,8 +73,8 @@ class MyHomePage extends StatelessWidget {
                   ),
                   child: Column(
                     children: <Widget>[
-                      Text('Hi ' + BlocProvider.of<UserState>(context, listen: false).state['name']!.toString()),
-                      Text(BlocProvider.of<UserState>(context, listen: false).state['email']!.toString()),
+                      Text('Hi ' + user['name']!.toString()),
+                      Text(user['email']!.toString()),
                     ]
                   ),
                 ),
