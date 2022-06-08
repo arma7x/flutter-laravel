@@ -35,8 +35,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    Api.ValidateToken(context);
-
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -56,9 +54,41 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
+    Api.validateToken(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+      ),
+      drawer: Drawer(
+        child: BlocBuilder<UserState, Map<String, dynamic>>(
+          builder: (context, Map<String, dynamic> user) {
+            return ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      Text('Hi ' + user['name']!),
+                      Text(user['email']!),
+                    ]
+                  ),
+                ),
+                ListTile(
+                  title: const Text('Item 1'),
+                  onTap: () {},
+                ),
+                ListTile(
+                  title: const Text('Item 2'),
+                  onTap: () {},
+                ),
+              ],
+            );
+          },
+        ),
       ),
       body: Center(
         child: Column(
