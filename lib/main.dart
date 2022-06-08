@@ -61,8 +61,8 @@ class MyHomePage extends StatelessWidget {
         title: Text(title),
       ),
       drawer: Drawer(
-        child: BlocBuilder<UserState, Map<String, dynamic>>(
-          builder: (context, Map<String, dynamic> user) {
+        child: BlocBuilder<AuthState, bool>(
+          builder: (context, bool status) {
             return ListView(
               padding: EdgeInsets.zero,
               children: [
@@ -72,17 +72,16 @@ class MyHomePage extends StatelessWidget {
                   ),
                   child: Column(
                     children: <Widget>[
-                      Text('Hi ' + user['name']!),
-                      Text(user['email']!),
+                      Text('Hi ' + BlocProvider.of<UserState>(context, listen: false).state['name']!.toString()),
+                      Text(BlocProvider.of<UserState>(context, listen: false).state['email']!.toString()),
                     ]
                   ),
                 ),
-                ListTile(
-                  title: const Text('Item 1'),
+                !status ? ListTile(
+                  title: const Text('Login'),
                   onTap: () {},
-                ),
-                ListTile(
-                  title: const Text('Item 2'),
+                ) : ListTile(
+                  title: const Text('Logout'),
                   onTap: () {},
                 ),
               ],
