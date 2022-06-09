@@ -64,7 +64,7 @@ class _LoginQrCodeScreenState extends State<LoginQrCodeScreen> {
         setState(() {
           _status = true;
         });
-        print('Barcode Type: ${describeEnum(result!.format)}, Data: ${result!.code}');
+        // print('Barcode Type: ${describeEnum(result!.format)}, Data: ${result!.code}');
         Api.validateToken(
           result!.code,
           (String errorMesage) {

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:core';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart' show BuildContext;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_laravel/bloc/AuthState.dart';
@@ -31,7 +31,6 @@ class Api {
                 url,
                 headers: <String, String>{
                     'Content-Type': 'application/json; charset=UTF-8',
-                    'user-Agent': 'Flutter',
                 },
                 body: json.encode(parameter),
             );
@@ -95,14 +94,6 @@ class Api {
         return Uri.http(baseUrl, resetPasswordPath);
     }
 
-    static IOSOptions _getIOSOptions() {
-        return const IOSOptions(accountName: "flutter-laravel");
-    }
-
-    static AndroidOptions _getAndroidOptions() {
-        return const AndroidOptions(encryptedSharedPreferences: true);
-    }
-
     static void validateToken(String? qrtoken, Function(String) errorCallback, Function() successCallback, BuildContext context) async {
 
         void fallback(String token, String? usr) {
@@ -112,12 +103,12 @@ class Api {
             }
         }
 
-        const storage = FlutterSecureStorage();
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
         String? token = qrtoken;
         if (token == null)
-            token = await storage.read(key: tokenKey);
+            token = prefs.getString(tokenKey);
         if (token != null) {
-            String? user = await storage.read(key: userKey);
+            String? user = prefs.getString(userKey);
             try {
                 final response = await getUserInfo(token);
                 final responseBody = json.decode(response.body);
@@ -145,36 +136,18 @@ class Api {
     }
 
     static void saveSession(String token, Map<String, dynamic> user, BuildContext context) async {
-        const storage = FlutterSecureStorage();
-        await storage.write(
-            key: tokenKey,
-            value: token,
-            iOptions: _getIOSOptions(),
-            aOptions: _getAndroidOptions(),
-        );
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString(tokenKey, token);
         BlocProvider.of<AuthState>(context).add(UserLoggedIn());
-        await storage.write(
-            key: userKey,
-            value: json.encode(user),
-            iOptions: _getIOSOptions(),
-            aOptions: _getAndroidOptions(),
-        );
+        await prefs.setString(userKey, json.encode(user));
         BlocProvider.of<UserState>(context).saveUser(user);
     }
 
     static void destroySession(BuildContext context) async {
-        const storage = FlutterSecureStorage();
-        await storage.delete(
-            key: tokenKey,
-            iOptions: _getIOSOptions(),
-            aOptions: _getAndroidOptions(),
-        );
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await await prefs.remove(tokenKey);
         BlocProvider.of<AuthState>(context).add(UserLoggedOut());
-        await storage.delete(
-            key: userKey,
-            iOptions: _getIOSOptions(),
-            aOptions: _getAndroidOptions(),
-        );
+        await await prefs.remove(userKey);
         BlocProvider.of<UserState>(context).removeUser();
     }
 
