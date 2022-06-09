@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter_laravel/api.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_laravel/navigations/LoginQrCodeScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -123,7 +125,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: ElevatedButton(
                     child: const Text('Login via QR-Code'),
-                    onPressed: () {},
+                    onPressed: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(builder: (context) => const LoginQrCodeScreen()),
+                        );
+                    },
                   )
               ),
               Row(
