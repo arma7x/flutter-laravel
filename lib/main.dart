@@ -65,7 +65,7 @@ class MyHomePage extends StatelessWidget {
       drawer: Drawer(
         child: BlocBuilder<AuthState, bool>(
           builder: (context, bool status) {
-            Map<String, dynamic> user = BlocProvider.of<UserState>(context, listen: false).state;
+            Map<String, dynamic> user = BlocProvider.of<UserState>(context, listen: true).state;
             return ListView(
               padding: EdgeInsets.zero,
               children: [
