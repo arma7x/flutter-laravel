@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ class LoginQrCodeScreen extends StatefulWidget {
 
 class _LoginQrCodeScreenState extends State<LoginQrCodeScreen> {
 
+  bool _status = false;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   Barcode? result;
   QRViewController? controller;
@@ -44,10 +46,7 @@ class _LoginQrCodeScreenState extends State<LoginQrCodeScreen> {
           Expanded(
             flex: 1,
             child: Center(
-              child: (result != null)
-                  ? Text(
-                      'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-                  : Text('Scan a code'),
+              child: Text('Scan a code'),
             ),
           )
         ],
@@ -61,6 +60,27 @@ class _LoginQrCodeScreenState extends State<LoginQrCodeScreen> {
       setState(() {
         result = scanData;
       });
+      if (result!.format != null && result!.code != null && _status == false) {
+        setState(() {
+          _status = true;
+        });
+        print('Barcode Type: ${describeEnum(result!.format)}, Data: ${result!.code}');
+        Api.validateToken(
+          result!.code,
+          (String errorMesage) {
+            setState(() {
+              _status = false;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMesage)));
+          },
+          () {
+            Timer(Duration(seconds: 1), () {
+              Navigator.popUntil(context, ModalRoute.withName('/'));
+            });
+          },
+          context,
+        );
+      }
     });
   }
 

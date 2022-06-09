@@ -56,7 +56,7 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    Api.validateToken(context);
+    Api.validateToken(null, (String err) => {}, () => {}, context);
 
     return Scaffold(
       appBar: AppBar(

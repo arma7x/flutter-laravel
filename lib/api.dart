@@ -3,7 +3,7 @@ import 'dart:core';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter/material.dart' show BuildContext, ScaffoldMessenger, SnackBar, Text;
+import 'package:flutter/material.dart' show BuildContext;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_laravel/bloc/AuthState.dart';
 import 'package:flutter_laravel/bloc/UserState.dart';
@@ -12,7 +12,7 @@ class Api {
 
     static const String tokenKey = "sanctum-token";
     static const String userKey = "laravel-user";
-    static const String baseUrl = '192.168.56.1:8000';
+    static const String baseUrl = '192.168.43.33:8000'; // 192.168.43.33:8000 192.168.56.1:8000
     static const String pingPath = 'api/ping';
     static const String createTokenPath = 'api/tokens/create';
     static const String userInfoPath = 'api/user';
@@ -103,7 +103,7 @@ class Api {
         return const AndroidOptions(encryptedSharedPreferences: true);
     }
 
-    static void validateToken(BuildContext context) async {
+    static void validateToken(String? qrtoken, Function(String) errorCallback, Function() successCallback, BuildContext context) async {
 
         void fallback(String token, String? usr) {
             if (usr != null) {
@@ -113,7 +113,9 @@ class Api {
         }
 
         const storage = FlutterSecureStorage();
-        String? token = await storage.read(key: tokenKey);
+        String? token = qrtoken;
+        if (token == null)
+            token = await storage.read(key: tokenKey);
         if (token != null) {
             String? user = await storage.read(key: userKey);
             try {
@@ -121,26 +123,22 @@ class Api {
                 final responseBody = json.decode(response.body);
                 if (response.statusCode == 200) {
                     saveSession(token, responseBody, context);
+                    successCallback();
                 } else if (response.statusCode == 401) {
-                    final snackBar = SnackBar(content: Text(responseBody['message']!));
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    errorCallback(responseBody['message']!);
                     destroySession(context);
                 } else {
-                    final snackBar = SnackBar(content: Text("Unknown"));
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    errorCallback("Unknown");
                     fallback(token, user);
                 }
             } on SocketException {
-                final snackBar = SnackBar(content: Text("No Internet connection 😑"));
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                errorCallback("No Internet connection 😑");
                 fallback(token, user);
             } on HttpException {
-                final snackBar = SnackBar(content: Text("Couldn't find the post 😱"));
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                errorCallback("Couldn't find the post 😱");
                 fallback(token, user);
             } on FormatException {
-                final snackBar = SnackBar(content: Text("Bad response format 👎"));
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                errorCallback("Bad response format 👎");
                 fallback(token, user);
             }
         }
