@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_laravel/api.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:flutter_laravel/mixins/utils.dart';
 
 class LoginQrCodeScreen extends StatefulWidget {
   const LoginQrCodeScreen({Key? key}) : super(key: key);
@@ -12,7 +13,7 @@ class LoginQrCodeScreen extends StatefulWidget {
   State<LoginQrCodeScreen> createState() => _LoginQrCodeScreenState();
 }
 
-class _LoginQrCodeScreenState extends State<LoginQrCodeScreen> {
+class _LoginQrCodeScreenState extends State<LoginQrCodeScreen> with FragmentUtils {
 
   bool _status = false;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -37,20 +38,19 @@ class _LoginQrCodeScreenState extends State<LoginQrCodeScreen> {
       body: Column(
         children: <Widget>[
           Expanded(
-            flex: 5,
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-            ),
-          ),
-          Expanded(
             flex: 1,
-            child: Center(
-              child: Text('Scan a code'),
-            ),
-          )
+            child: _buildQrView(context),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildQrView(BuildContext context) {
+    return QRView(
+      key: qrKey,
+      onQRViewCreated: _onQRViewCreated,
+      onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
     );
   }
 
@@ -61,19 +61,22 @@ class _LoginQrCodeScreenState extends State<LoginQrCodeScreen> {
         result = scanData;
       });
       if (result!.format != null && result!.code != null && _status == false) {
+        // print('Barcode Type: ${describeEnum(result!.format)}, Data: ${result!.code}');
+        showloadingDialog(true, context);
         setState(() {
           _status = true;
         });
-        // print('Barcode Type: ${describeEnum(result!.format)}, Data: ${result!.code}');
         Api.validateToken(
           result!.code,
           (String errorMesage) {
+            showloadingDialog(false, context);
             setState(() {
               _status = false;
             });
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMesage)));
           },
           () {
+            showloadingDialog(false, context);
             Timer(Duration(seconds: 1), () {
               Navigator.popUntil(context, ModalRoute.withName('/'));
             });
@@ -82,6 +85,15 @@ class _LoginQrCodeScreenState extends State<LoginQrCodeScreen> {
         );
       }
     });
+  }
+
+  void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
+    print('${DateTime.now().toIso8601String()}_onPermissionSet $p');
+    if (!p) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('no Permission')),
+      );
+    }
   }
 
   @override

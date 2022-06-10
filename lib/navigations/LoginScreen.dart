@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter_laravel/api.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_laravel/navigations/LoginQrCodeScreen.dart';
+import 'package:flutter_laravel/mixins/utils.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -11,7 +12,7 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with FragmentUtils {
 
   final _formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
@@ -98,15 +99,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Text('Login'),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
+                        showloadingDialog(true, context);
                         Api.createToken(
                           <String, String>{
                             'email': emailController.text,
                             'password': passwordController.text,
                           },
                           (String errorMessage) {
+                            showloadingDialog(false, context);
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMessage)));
                           },
                           () {
+                            showloadingDialog(false, context);
                             Navigator.of(context).pop();
                           },
                           context,

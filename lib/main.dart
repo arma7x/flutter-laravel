@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_laravel/bloc/AuthState.dart';
 import 'package:flutter_laravel/bloc/UserState.dart';
 import 'package:flutter_laravel/navigations/LoginScreen.dart';
+import 'package:flutter_laravel/navigations/LoginQrCodeScreen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   BlocOverrides.runZoned(
@@ -53,6 +55,64 @@ class MyHomePage extends StatelessWidget {
 
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
+  List<Widget> getDrawerMenu(bool status, BuildContext context) {
+    if (!status) {
+      return <Widget>[
+        ListTile(
+          title: const Text('Login'),
+          onTap: () {
+            Navigator.of(context).pop();
+            Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (context) => const LoginScreen()),
+            );
+          },
+        ),
+        ListTile(
+          title: const Text('Login via QR-Code'),
+          onTap: () {
+            Navigator.of(context).pop();
+            Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (context) => const LoginQrCodeScreen()),
+            );
+          },
+        ),
+        ListTile(
+          title: const Text('Register'),
+          onTap: () async {
+            Navigator.of(context).pop();
+            try {
+              await launchUrl(Api.getRegisterLink());
+            } catch(e) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+            }
+          },
+        ),
+        ListTile(
+          title: const Text('Forgot Password'),
+          onTap: () async {
+            Navigator.of(context).pop();
+            try {
+              await launchUrl(Api.getResetPasswordLink());
+            } catch(e) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+            }
+          },
+        ),
+      ];
+    }
+    return <Widget>[
+      ListTile(
+        title: const Text('Logout'),
+        onTap: () {
+          Navigator.of(context).pop();
+          Api.destroySession(context);
+        },
+      )
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -68,34 +128,40 @@ class MyHomePage extends StatelessWidget {
             Map<String, dynamic> user = BlocProvider.of<UserState>(context, listen: true).state;
             return ListView(
               padding: EdgeInsets.zero,
-              children: [
+              children: <Widget>[
                 DrawerHeader(
                   decoration: BoxDecoration(
                     color: Colors.blue,
                   ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      Text('Hi ' + user['name']!.toString()),
-                      Text(user['email']!.toString()),
+                      CircleAvatar(
+                        radius: 45.0,
+                        backgroundColor: const Color(0xFF778899),
+                        backgroundImage: NetworkImage("http://tineye.com/images/widgets/mona.jpg"),
+                      ),
+                      SizedBox(height: 9),
+                      Text(
+                        'Hi ' + user['name']!.toString(),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 15)
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        user['email']!.toString(),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 13)
+                      ),
                     ]
                   ),
                 ),
-                !status ? ListTile(
-                  title: const Text('Login'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    Navigator.push(
-                      context,
-                      CupertinoPageRoute(builder: (context) => const LoginScreen()),
-                    );
-                  },
-                ) : ListTile(
-                  title: const Text('Logout'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    Api.destroySession(context);
-                  },
-                ),
+                ...getDrawerMenu(status, context),
               ],
             );
           },
