@@ -112,7 +112,10 @@ class MyHomePage extends StatelessWidget {
         title: const Text('Logout'),
         onTap: () {
           Navigator.of(context).pop();
+          // BlocProvider.of<UserState>(context, listen: false).state['type']! === UserState.laravelAuthentication
           Api.destroySession(context);
+          // BlocProvider.of<UserState>(context, listen: false).state['type']! === UserState.firebaseAuthentication
+          // destroy firebase
         },
       )
     ];

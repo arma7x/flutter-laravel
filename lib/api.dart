@@ -39,7 +39,7 @@ class Api {
                 final userResponse = await getUserInfo(authResponseBody['token']);
                 final userResponseBody = json.decode(userResponse.body);
                 if (userResponse.statusCode == 200) {
-                    userResponseBody['type'] = UserState.laravelAuthentication;
+                    userResponseBody['type'] = UserType.laravel;
                     saveSession(authResponseBody['token'], userResponseBody, context);
                     successCallback();
                 } else if (userResponse.statusCode == 401) {
@@ -100,7 +100,7 @@ class Api {
         void fallback(String token, String? usr) {
             if (usr != null) {
                 final decodedUser = json.decode(usr);
-                decodedUser['type'] = UserState.laravelAuthentication;
+                decodedUser['type'] = UserType.laravel;
                 saveSession(token, decodedUser, context);
             }
         }
@@ -115,6 +115,7 @@ class Api {
                 final response = await getUserInfo(token);
                 final responseBody = json.decode(response.body);
                 if (response.statusCode == 200) {
+                    responseBody['type'] = UserType.laravel;
                     saveSession(token, responseBody, context);
                     successCallback();
                 } else if (response.statusCode == 401) {

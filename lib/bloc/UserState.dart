@@ -6,16 +6,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
  * 1 => laravel_authentication
  * 2 => firebase_authentication
 */
-class UserState extends Cubit<Map<String, dynamic>> {
 
-    static int guest = 0;
-    static int laravelAuthentication = 1;
-    static int firebaseAuthentication = 2;
+enum UserType { guest, laravel, firebase }
+
+class UserState extends Cubit<Map<String, dynamic>> {
 
     static Map<String, dynamic> dummy = {
         "name": "Guest",
         "email": "Please login",
-        "type": 0,
+        "type": UserType.guest,
     };
 
     UserState() : super(dummy);
