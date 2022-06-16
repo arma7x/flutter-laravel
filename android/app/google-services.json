@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "701446495044",
+    "project_id": "parry-b18e0",
+    "storage_bucket": "parry-b18e0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:701446495044:android:f7d464a1564d87b7879511",
+        "android_client_info": {
+          "package_name": "com.arma7x.flutter_laravel"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "701446495044-15007c6uq6tsbtllmdhri9l5prhrhjgd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arma7x.flutter_laravel",
+            "certificate_hash": "825af016cb8f1967d39551b95a2d7c627491888b"
+          }
+        },
+        {
+          "client_id": "701446495044-hv369q6osf43qr4ah699e14vmtl6fmu5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA31tUNuGpYF9hEBaRzwQRJi9tKQIVwexI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "701446495044-hv369q6osf43qr4ah699e14vmtl6fmu5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "701446495044-j0sae489phucrapjndh6a42tr7na6anf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.arma7x.flutterLaravel"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

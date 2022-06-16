@@ -7,8 +7,13 @@ import 'package:flutter_laravel/bloc/UserState.dart';
 import 'package:flutter_laravel/navigations/LoginScreen.dart';
 import 'package:flutter_laravel/navigations/LoginQrCodeScreen.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+Future<void> main() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   BlocOverrides.runZoned(
     () => runApp(const App()),
   );
