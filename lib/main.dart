@@ -11,6 +11,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -112,9 +113,9 @@ class MyHomePage extends StatelessWidget {
         title: const Text('Logout'),
         onTap: () {
           Navigator.of(context).pop();
-          // BlocProvider.of<UserState>(context, listen: false).state['type']! === UserState.laravelAuthentication
+          // BlocProvider.of<UserState>(context, listen: false).state['type']! === UserState.laravel
           Api.destroySession(context);
-          // BlocProvider.of<UserState>(context, listen: false).state['type']! === UserState.firebaseAuthentication
+          // BlocProvider.of<UserState>(context, listen: false).state['type']! === UserState.firebase
           // destroy firebase
         },
       )
