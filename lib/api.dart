@@ -100,8 +100,10 @@ class Api {
         void fallback(String token, String? usr) {
             if (usr != null) {
                 final decodedUser = json.decode(usr);
-                decodedUser['type'] = UserState.laravel;
-                saveSession(token, decodedUser, context);
+                if (decodedUser['type'] != UserState.firebase) {
+                    decodedUser['type'] = UserState.laravel;
+                    saveSession(token, decodedUser, context);
+                }
             }
         }
 
@@ -115,11 +117,17 @@ class Api {
                 final response = await getUserInfo(token);
                 final responseBody = json.decode(response.body);
                 if (response.statusCode == 200) {
+                    responseBody['type'] = UserState.laravel;
                     saveSession(token, responseBody, context);
                     successCallback();
                 } else if (response.statusCode == 401) {
                     errorCallback(responseBody['message']!);
-                    destroySession(context);
+                    if (user != null) {
+                        final decodedUser = json.decode(user);
+                        if (decodedUser['type'] != UserState.firebase) {
+                            destroySession(context);
+                        }
+                    }
                 } else {
                     errorCallback("Unknown");
                     fallback(token, user);
@@ -135,6 +143,15 @@ class Api {
                 fallback(token, user);
             }
         }
+    }
+
+    static Future<Map<String, dynamic>> getSession() async {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        String? user = prefs.getString(userKey);
+        if (user == null)
+            return UserState.dummy;
+        final decodedUser = json.decode(user);
+        return decodedUser;
     }
 
     static void saveSession(String token, Map<String, dynamic> user, BuildContext context) async {
