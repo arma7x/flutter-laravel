@@ -138,7 +138,15 @@ class MyHomePage extends StatelessWidget {
     if (BlocProvider.of<UserState>(context, listen: false).state['type']! == UserState.firebase) {
       widgets.add(ListTile(
           title: const Text('Profile'),
-          onTap: () {
+          onTap: () async {
+            var token = await FirebaseAuth.instance.currentUser!.getIdToken();
+            Api.getFirebaseUser(token)
+            .then((response) {
+                print(response.body);
+            })
+            .catchError((error) {
+                print(error);
+            });
             Navigator.of(context).pop();
             Navigator.push(
               context,
@@ -175,9 +183,7 @@ class MyHomePage extends StatelessWidget {
 
     Api.validateToken(null, (String err) => {}, () => {}, context);
 
-    FirebaseAuth.instance
-    .authStateChanges()
-    .listen((User? user) async {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
       if (user == null) {
         var decodedUser = await Api.getSession();
         if (decodedUser['type'] != UserState.laravel) {

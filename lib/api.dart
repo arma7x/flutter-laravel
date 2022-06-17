@@ -15,9 +15,10 @@ class Api {
     static const String baseUrl = '192.168.43.33:8000'; // 192.168.43.33:8000 192.168.56.1:8000
     static const String pingPath = 'api/ping';
     static const String createTokenPath = 'api/tokens/create';
-    static const String userInfoPath = 'api/user';
     static const String registerPath = 'register';
     static const String resetPasswordPath = 'password/reset';
+    static const String apiUserPath = 'api/user';
+    static const String apiFirebaseUserPath = 'api/firebase/user';
 
     static Future<http.Response> pingServer() async {
         final url = Uri.http(baseUrl, pingPath);
@@ -36,7 +37,7 @@ class Api {
             );
             final authResponseBody = json.decode(authResponse.body);
             if (authResponse.statusCode == 200) {
-                final userResponse = await getUserInfo(authResponseBody['token']);
+                final userResponse = await getUser(authResponseBody['token']);
                 final userResponseBody = json.decode(userResponse.body);
                 if (userResponse.statusCode == 200) {
                     userResponseBody['type'] = UserState.laravel;
@@ -76,13 +77,24 @@ class Api {
         }
     }
 
-    static Future<http.Response> getUserInfo(String token) async {
-        final url = Uri.http(baseUrl, userInfoPath);
+    static Future<http.Response> getUser(String token) async {
+        final url = Uri.http(baseUrl, apiUserPath);
         return await http.get(
             url,
             headers: <String, String>{
                 'Content-Type': 'application/json; charset=UTF-8',
                 'Authorization': 'Bearer $token',
+            }
+        );
+    }
+
+    static Future<http.Response> getFirebaseUser(String token) async {
+        final url = Uri.http(baseUrl, apiFirebaseUserPath);
+        return await http.get(
+            url,
+            headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8',
+                'Authorization': token,
             }
         );
     }
@@ -114,7 +126,7 @@ class Api {
         if (token != null) {
             String? user = prefs.getString(userKey);
             try {
-                final response = await getUserInfo(token);
+                final response = await getUser(token);
                 final responseBody = json.decode(response.body);
                 if (response.statusCode == 200) {
                     responseBody['type'] = UserState.laravel;
@@ -143,6 +155,11 @@ class Api {
                 fallback(token, user);
             }
         }
+    }
+
+    static Future<String?> getToken() async {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        return prefs.getString(tokenKey);
     }
 
     static Future<Map<String, dynamic>> getSession() async {
