@@ -92,28 +92,6 @@ class MyHomePage extends StatelessWidget {
             );
           },
         ),
-        //ListTile(
-          //title: const Text('Register'),
-          //onTap: () async {
-            //Navigator.of(context).pop();
-            //try {
-              //await launchUrl(Api.getRegisterLink());
-            //} catch(e) {
-              //ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-            //}
-          //},
-        //),
-        //ListTile(
-          //title: const Text('Forgot Password'),
-          //onTap: () async {
-            //Navigator.of(context).pop();
-            //try {
-              //await launchUrl(Api.getResetPasswordLink());
-            //} catch(e) {
-              //ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-            //}
-          //},
-        //),
         ListTile(
           title: const Text('Firebase Login'),
           onTap: () async {
